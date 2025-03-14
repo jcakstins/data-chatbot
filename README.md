@@ -45,13 +45,23 @@ This project is a chatbot that queries a SQLite database built from dummy school
    cd <repository-directory>
    ```
 
-2. **Build the docker image:**
+2. **Environment Variables Setup:**
+
+Before building the Docker image, you must create a `.env` file in the root of the project directory. This file should contain your OpenAI API key, which is required for the chatbot to function properly. For example, your `.env` file should include:
+
+```env
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+An example file named .env_example is provided. Copy this file, rename it to .env, and then update it with your OpenAI API key. This step must be completed before running docker build.
+
+3. **Build the docker image:**
 
    ```bash
    docker build -t school-data-chatbot .
    ```
 
-3. **Build the docker image:**
+4. **Build the docker image:**
 
    ```bash
    docker run -p 8002:8002 school-data-chatbot
