@@ -2,7 +2,9 @@
 
 ## Overview
 
-This project is a chatbot that queries a SQLite database built from dummy school data. The database contains multiple tables (e.g., terms, students, guardians, attendance, behaviour, and attainment) generated from `data/school_dummy_data.json`. The chatbot demonstrates function calling abilities by dynamically querying the database and plotting results based on user questions.
+![Application design](diagram/data-chatbot.png)
+
+This project is a chatbot that queries a SQLite database built from dummy school data. The database contains multiple tables (e.g., terms, students, guardians, attendance, behaviour, and attainment) generated from `data/school_dummy_data.json`. The chatbot demonstrates function calling abilities by dynamically querying the database and plotting results based on user questions utilising OpenAI API.
 
 ## Features
 
