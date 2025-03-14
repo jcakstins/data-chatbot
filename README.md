@@ -43,8 +43,8 @@ This project is a chatbot that queries a SQLite database built from dummy school
 1. **Clone the Repository:**
 
    ```bash
-   git clone <repository-url>
-   cd <repository-directory>
+   git clone https://github.com/jcakstins/data-chatbot.git
+   cd data-chatbot
    ```
 
 2. **Environment Variables Setup:**
