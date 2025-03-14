@@ -9,7 +9,6 @@ from plotly.graph_objs import Figure
 from bot import ChatBot
 from prompt import SYSTEM_PROMPT
 from tools import plot_chart, run_sqlite_query, tools_schema
-from utils import generate_sqlite_table_info_query
 
 # Compute the absolute path to the directory where this script resides (src/)
 src_dir = os.path.dirname(os.path.realpath(__file__))

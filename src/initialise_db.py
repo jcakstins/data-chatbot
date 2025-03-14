@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import json
+import logging
 from datetime import datetime
 
 def parse_date(date_str):
@@ -17,7 +18,6 @@ def create_tables(conn):
     """Creates tables in the SQLite database with explicit DDL."""
     c = conn.cursor()
     
-    # Terms table: termName is primary key; dates stored as ISO strings.
     c.execute('''
         CREATE TABLE IF NOT EXISTS terms (
             termName TEXT PRIMARY KEY,
@@ -26,7 +26,6 @@ def create_tables(conn):
         )
     ''')
     
-    # Students table: studentId is primary key; dob stored as DATE.
     c.execute('''
         CREATE TABLE IF NOT EXISTS students (
             studentId INTEGER PRIMARY KEY,
@@ -38,7 +37,6 @@ def create_tables(conn):
         )
     ''')
     
-    # Guardians table: Each record linked to a student.
     c.execute('''
         CREATE TABLE IF NOT EXISTS guardians (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,7 +49,6 @@ def create_tables(conn):
         )
     ''')
     
-    # Attendance table: Store attendance percentages as REAL numbers.
     c.execute('''
         CREATE TABLE IF NOT EXISTS attendance (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,7 +63,6 @@ def create_tables(conn):
         )
     ''')
     
-    # Behaviour table: Detentions and behaviourPoints stored as INTEGER.
     c.execute('''
         CREATE TABLE IF NOT EXISTS behaviour (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,7 +75,6 @@ def create_tables(conn):
         )
     ''')
     
-    # Attainment table: Scores stored as INTEGER.
     c.execute('''
         CREATE TABLE IF NOT EXISTS attainment (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -172,35 +167,85 @@ def insert_attainment(conn, attainment_data):
 def main():
     # Get the absolute path to the directory where this script resides.
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    
     # Compute the project base directory (one level up from 'src')
     project_dir = os.path.abspath(os.path.join(script_dir, '..'))
     
-    # Build paths to the data folder and the database folder
+    # Set up logging to init_db.log in the project root.
+    log_file = os.path.join(project_dir, 'init_db.log')
+    logging.basicConfig(
+        filename=log_file,
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger(__name__)
+    logger.info("Starting database initialisation.")
+    
+    # Build paths to the data folder and the database folder.
     data_dir = os.path.join(project_dir, 'data')
     json_file = os.path.join(data_dir, 'school_dummy_data.json')
-    db_file = os.path.join(data_dir, 'db', 'school.db')
+    db_folder = os.path.join(data_dir, 'db')
+    
+    # Ensure the database folder exists; create it if needed.
+    if not os.path.exists(db_folder):
+        os.makedirs(db_folder)
+        logger.info("Created database folder at %s", db_folder)
+    
+    db_file = os.path.join(db_folder, 'school.db')
+    
+    # Overwrite the database: remove the file if it exists.
+    if os.path.exists(db_file):
+        os.remove(db_file)
+        logger.info("Removed existing database file at %s", db_file)
     
     # Load JSON data from file.
-    with open(json_file, 'r') as f:
-        data = json.load(f)
+    try:
+        with open(json_file, 'r') as f:
+            data = json.load(f)
+        logger.info("Loaded JSON data from %s", json_file)
+    except Exception as e:
+        logger.error("Error reading JSON file: %s", e)
+        raise
     
-    # Connect to SQLite database (creates the file if it doesn't exist).
-    conn = sqlite3.connect(db_file)
+    # Connect to SQLite database (it will be created fresh).
+    try:
+        conn = sqlite3.connect(db_file)
+        logger.info("Connected to database at %s", db_file)
+    except Exception as e:
+        logger.error("Error connecting to database: %s", e)
+        raise
     
-    # Create tables using explicit DDL.
-    create_tables(conn)
+    try:
+        # Create tables and insert data.
+        create_tables(conn)
+        logger.info("Created database tables.")
+        
+        insert_terms(conn, data["terms"])
+        logger.info("Inserted terms data.")
+        
+        insert_students(conn, data["students"])
+        logger.info("Inserted students data.")
+        
+        insert_guardians(conn, data["guardians"])
+        logger.info("Inserted guardians data.")
+        
+        insert_attendance(conn, data["attendance"])
+        logger.info("Inserted attendance data.")
+        
+        insert_behaviour(conn, data["behaviour"])
+        logger.info("Inserted behaviour data.")
+        
+        insert_attainment(conn, data["attainment"])
+        logger.info("Inserted attainment data.")
+    except Exception as e:
+        logger.error("Error during database initialisation: %s", e)
+        raise
+    finally:
+        if conn:
+            conn.close()
+            logger.info("Database connection closed.")
     
-    # Insert data into each table.
-    insert_terms(conn, data["terms"])
-    insert_students(conn, data["students"])
-    insert_guardians(conn, data["guardians"])
-    insert_attendance(conn, data["attendance"])
-    insert_behaviour(conn, data["behaviour"])
-    insert_attainment(conn, data["attainment"])
-    
-    conn.close()
     print("Database initialised successfully.")
+    logger.info("Database initialised successfully.")
 
 if __name__ == '__main__':
     main()

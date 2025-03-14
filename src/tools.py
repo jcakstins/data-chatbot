@@ -141,7 +141,6 @@ async def plot_chart(
         raise ValueError("Lengths of x_values and y_values must be the same.")
 
     # Define plotly trace based on plot_type
-    # Define plotly trace based on plot_type
     if plot_type == "bar":
         trace = go.Bar(
             x=x_values, y=y_values, marker=dict(color="#24C8BF", line=dict(width=1))
